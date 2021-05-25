@@ -17,9 +17,9 @@ requirements:
   host:
     - pip
     - python
+    - wheel
   run:
     - python
-    - jsonpickle
     - enum34  # [py<34]
     - wrapt
     - future
@@ -37,13 +37,19 @@ test:
     - aws_xray_sdk.core.plugins
     - aws_xray_sdk.core.sampling
     - aws_xray_sdk.core.utils
+  requires:
+    - pip
+  commands:
+    - pip check
 
 about:
   home: https://github.com/aws/aws-xray-sdk-python
-  license: Apache Software
+  license: Apache-2.0
   license_family: APACHE
   license_file: LICENSE
   summary: The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service.
+  dev_url: https://github.com/aws/aws-xray-sdk-python
+  doc_url: https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html
 
 extra:
   recipe-maintainers:
