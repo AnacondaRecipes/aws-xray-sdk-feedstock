@@ -77,7 +77,8 @@ test:
   requires:
     - pip
     - pytest
-    - pytest-asyncio
+    # fixture 'event_loop' not found
+    - pytest-asyncio <0.21.0
     - pytest-benchmark
   commands:
     - pip check
