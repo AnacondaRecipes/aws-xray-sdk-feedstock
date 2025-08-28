@@ -1,46 +1,89 @@
 {% set name = "aws-xray-sdk" %}
-{% set version = "2.8.0" %}
+{% set version = "2.14.0" %}
 
 package:
-  name: "{{ name|lower }}"
-  version: "{{ version }}"
+  name: {{ name|lower }}
+  version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 90c2fcc982a770e86d009a4c3d2b5c3e372da91cb8284d982bae458e2c0bb268
+  - url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name|replace('-', '_') }}-{{ version }}.tar.gz
+    sha256: aab843c331af9ab9ba5cefb3a303832a19db186140894a523edafc024cc0493c
+  - url: https://github.com/aws/{{ name }}-python/archive/refs/tags/{{ version }}.tar.gz
+    sha256: e0de6c6860722cdf6dc4ef8f5e6868ac24465340a5efb156ed036a7238f1a22a
+    folder: gh
 
 build:
   number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv "
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  skip: true  # [py<37]
 
 requirements:
   host:
     - pip
     - python
+    - setuptools
     - wheel
   run:
     - python
-    - enum34  # [py<34]
     - wrapt
-    - future
     - botocore >=1.11.3
-    # uses pkg_resources
-    - setuptools
+
+# Relative path issue
+{% set ignore_tests = " --ignore=gh/tests/test_async_recorder.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_recorder.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_serialize_entities.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_trace_entities.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_utils.py" %}
+# Missing modules to test externals
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/ext" %}
+# >           raise Exception('modules %s are currently not supported for patching'
+                            # % ', '.join(unsupported_modules))
+# E           Exception: modules tests.mock_module are currently not supported for patching
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_patcher.py" %}
 
 test:
+  source_files:
+    - gh/tests
   imports:
     - aws_xray_sdk
     - aws_xray_sdk.core
-    - aws_xray_sdk.core.emitters
-    - aws_xray_sdk.core.exceptions
+    - aws_xray_sdk.core.async_context
+    - aws_xray_sdk.core.context
+    - aws_xray_sdk.core.daemon_config
+    - aws_xray_sdk.core.emitters.udp_emitter
+    - aws_xray_sdk.core.exceptions.exceptions
+    - aws_xray_sdk.core.lambda_launcher
     - aws_xray_sdk.core.models
-    - aws_xray_sdk.core.plugins
-    - aws_xray_sdk.core.sampling
+    - aws_xray_sdk.core.models.dummy_entities
+    - aws_xray_sdk.core.models.facade_segment
+    - aws_xray_sdk.core.models.segment
+    - aws_xray_sdk.core.models.subsegment
+    - aws_xray_sdk.core.models.throwable
+    - aws_xray_sdk.core.models.trace_header
+    - aws_xray_sdk.core.models.traceid
+    - aws_xray_sdk.core.patcher
+    - aws_xray_sdk.core.plugins.utils
+    - aws_xray_sdk.core.recorder
+    - aws_xray_sdk.core.sampling.local.sampler
+    - aws_xray_sdk.core.sampling.local.sampling_rule
+    - aws_xray_sdk.core.sampling.reservoir
+    - aws_xray_sdk.core.sampling.rule_cache
+    - aws_xray_sdk.core.sampling.sampler
+    - aws_xray_sdk.core.sampling.sampling_rule
     - aws_xray_sdk.core.utils
+    - aws_xray_sdk.core.utils.search_pattern
+    - aws_xray_sdk.core.utils.sqs_message_helper
+    - aws_xray_sdk.version
   requires:
     - pip
+    - pytest
+    # fixture 'event_loop' not found
+    - pytest-asyncio <0.21.0
+    - pytest-benchmark
   commands:
     - pip check
+    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
+    - pytest {{ ignore_tests }} gh/tests
 
 about:
   home: https://github.com/aws/aws-xray-sdk-python
@@ -48,6 +91,8 @@ about:
   license_family: APACHE
   license_file: LICENSE
   summary: The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service.
+  description: 
+    The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service.
   dev_url: https://github.com/aws/aws-xray-sdk-python
   doc_url: https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html
 
