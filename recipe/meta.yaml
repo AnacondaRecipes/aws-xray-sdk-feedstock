@@ -1,5 +1,12 @@
 {% set name = "aws-xray-sdk" %}
-{% set version = "2.14.0" %}
+{% set version = "2.15.0" %}
+{% set ignore_tests = " --ignore=gh/tests/test_async_recorder.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_recorder.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_serialize_entities.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_trace_entities.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_utils.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/ext" %}
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_patcher.py" %}
 
 package:
   name: {{ name|lower }}
@@ -7,9 +14,9 @@ package:
 
 source:
   - url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name|replace('-', '_') }}-{{ version }}.tar.gz
-    sha256: aab843c331af9ab9ba5cefb3a303832a19db186140894a523edafc024cc0493c
+    sha256: 794381b96e835314345068ae1dd3b9120bd8b4e21295066c37e8814dbb341365
   - url: https://github.com/aws/{{ name }}-python/archive/refs/tags/{{ version }}.tar.gz
-    sha256: e0de6c6860722cdf6dc4ef8f5e6868ac24465340a5efb156ed036a7238f1a22a
+    sha256: db66fbcde1519ca5db2456d73fe86dae569f39a6c03dbc5a94290783d12f2af1
     folder: gh
 
 build:
@@ -29,18 +36,11 @@ requirements:
     - botocore >=1.11.3
 
 # Relative path issue
-{% set ignore_tests = " --ignore=gh/tests/test_async_recorder.py" %}
-{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_recorder.py" %}
-{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_serialize_entities.py" %}
-{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_trace_entities.py" %}
-{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_utils.py" %}
 # Missing modules to test externals
-{% set ignore_tests = ignore_tests + " --ignore=gh/tests/ext" %}
-# >           raise Exception('modules %s are currently not supported for patching'
-                            # % ', '.join(unsupported_modules))
-# E           Exception: modules tests.mock_module are currently not supported for patching
-{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_patcher.py" %}
+<conda_recipe_manager.types.SentinelType object at 0x7f5ad4000440>:  # >           raise Exception('modules %s are currently not supported for patching'
+  # % ', '.join(unsupported_modules))
 
+# E           Exception: modules tests.mock_module are currently not supported for patching
 test:
   source_files:
     - gh/tests
@@ -91,8 +91,7 @@ about:
   license_family: APACHE
   license_file: LICENSE
   summary: The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service.
-  description: 
-    The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service.
+  description: The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service.
   dev_url: https://github.com/aws/aws-xray-sdk-python
   doc_url: https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html
 
