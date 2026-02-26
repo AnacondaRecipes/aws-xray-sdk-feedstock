@@ -1,5 +1,5 @@
 {% set name = "aws-xray-sdk" %}
-{% set version = "2.14.0" %}
+{% set version = "2.15.0" %}
 
 package:
   name: {{ name|lower }}
@@ -7,14 +7,14 @@ package:
 
 source:
   - url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name|replace('-', '_') }}-{{ version }}.tar.gz
-    sha256: aab843c331af9ab9ba5cefb3a303832a19db186140894a523edafc024cc0493c
+    sha256: 794381b96e835314345068ae1dd3b9120bd8b4e21295066c37e8814dbb341365
   - url: https://github.com/aws/{{ name }}-python/archive/refs/tags/{{ version }}.tar.gz
-    sha256: e0de6c6860722cdf6dc4ef8f5e6868ac24465340a5efb156ed036a7238f1a22a
+    sha256: db66fbcde1519ca5db2456d73fe86dae569f39a6c03dbc5a94290783d12f2af1
     folder: gh
 
 build:
   number: 0
-  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed --no-cache-dir -vvv
   skip: true  # [py<37]
 
 requirements:
@@ -77,8 +77,7 @@ test:
   requires:
     - pip
     - pytest
-    # fixture 'event_loop' not found
-    - pytest-asyncio <0.21.0
+    - pytest-asyncio
     - pytest-benchmark
   commands:
     - pip check
