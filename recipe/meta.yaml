@@ -42,6 +42,8 @@ requirements:
 {% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_patcher.py" %}
 # E   ModuleNotFoundError: No module named 'pkg_resources'
 {% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_local_sampling_benchmark.py" %}
+# ModuleNotFoundError: No module named 'pkg_resources'
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_patcher.py" %}  # [py>=314]
 
 test:
   source_files:
@@ -81,9 +83,10 @@ test:
     - pytest
     # Starting from version 0.23.0 fixture event_loop is not available
     # E       fixture 'event_loop' not found
-    # According to upstream
+    # According to upstream documentation
     # https://github.com/aws/aws-xray-sdk-python/blob/48b6a8f2bb134c84b283666d1c2b4c1e9e6def6f/tox.ini#L61
-    - pytest-asyncio == 0.21.2
+    - pytest-asyncio ==0.21.2  # [py<314]
+    - pytest-asyncio  # [py>=314]
     - pytest-benchmark
     # Tests require a valid CA bundle with the path to certificates.
     # ca-certificates contains needed certificates.
