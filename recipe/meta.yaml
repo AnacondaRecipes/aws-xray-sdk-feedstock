@@ -2,7 +2,7 @@
 {% set version = "2.15.0" %}
 
 package:
-  name: {{ name|lower }}
+  name: {{ name }}
   version: {{ version }}
 
 source:
@@ -13,7 +13,7 @@ source:
     folder: gh
 
 build:
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed --no-cache-dir -vvv
   skip: true  # [py<37]
 
@@ -40,6 +40,12 @@ requirements:
                             # % ', '.join(unsupported_modules))
 # E           Exception: modules tests.mock_module are currently not supported for patching
 {% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_patcher.py" %}
+# E   ModuleNotFoundError: No module named 'pkg_resources'
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_local_sampling_benchmark.py" %}
+# ModuleNotFoundError: No module named 'pkg_resources'
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_patcher.py" %}  # [py>=314]
+
+{% set disabled_tests = " --deselect=gh/tests/test_async_local_storage.py::test_localstorage_isolation" %}  # [py>=314]
 
 test:
   source_files:
@@ -77,12 +83,23 @@ test:
   requires:
     - pip
     - pytest
-    - pytest-asyncio
+    # Starting from version 0.23.0 fixture event_loop is not available
+    # E       fixture 'event_loop' not found
+    # According to upstream documentation
+    # https://github.com/aws/aws-xray-sdk-python/blob/48b6a8f2bb134c84b283666d1c2b4c1e9e6def6f/tox.ini#L61
+    - pytest-asyncio ==0.21.2  # [py<314]
+    - pytest-asyncio  # [py>=314]
     - pytest-benchmark
+    # Tests require a valid CA bundle with the path to certificates.
+    # ca-certificates contains needed certificates.
+    - ca-certificates
   commands:
     - pip check
+    # Tests require a valid CA bundle with the path to certificates.
+    - export REQUESTS_CA_BUNDLE=/ssl/cacert.pem  # [not win]
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
-    - pytest {{ ignore_tests }} gh/tests
+    - pytest -vv {{ ignore_tests }} gh/tests  # [py<314]
+    - pytest -vv {{ ignore_tests }} {{ disabled_tests }} gh/tests  # [py>=314]
 
 about:
   home: https://github.com/aws/aws-xray-sdk-python
