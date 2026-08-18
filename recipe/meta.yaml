@@ -21,6 +21,8 @@ requirements:
   host:
     - pip
     - python
+    # ModuleNotFoundError: No module named 'pkg_resources'
+    # pin setuptools to version which is support pkg_resources
     - setuptools <=82
     - wheel
   run:
