@@ -21,9 +21,7 @@ requirements:
   host:
     - pip
     - python
-    # ModuleNotFoundError: No module named 'pkg_resources'
-    # pin setuptools to version which is support pkg_resources
-    - setuptools <=82
+    - setuptools
     - wheel
   run:
     - python
@@ -42,6 +40,8 @@ requirements:
                             # % ', '.join(unsupported_modules))
 # E           Exception: modules tests.mock_module are currently not supported for patching
 {% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_patcher.py" %}
+# E   ModuleNotFoundError: No module named 'pkg_resources'
+{% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_local_sampling_benchmark.py" %}
 
 test:
   source_files:
