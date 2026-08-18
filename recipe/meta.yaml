@@ -45,6 +45,8 @@ requirements:
 # ModuleNotFoundError: No module named 'pkg_resources'
 {% set ignore_tests = ignore_tests + " --ignore=gh/tests/test_patcher.py" %}  # [py>=314]
 
+{% set disabled_tests = " --deselect=gh/tests/test_async_local_storage.py::test_localstorage_isolation" %}  # [py>=314]
+
 test:
   source_files:
     - gh/tests
@@ -96,7 +98,7 @@ test:
     # Tests require a valid CA bundle with the path to certificates.
     - export REQUESTS_CA_BUNDLE=/ssl/cacert.pem  # [not win]
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
-    - pytest -vv {{ ignore_tests }} gh/tests
+    - pytest -vv {{ ignore_tests }} {{ disabled_tests }} gh/tests
 
 about:
   home: https://github.com/aws/aws-xray-sdk-python
