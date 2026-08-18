@@ -98,7 +98,8 @@ test:
     # Tests require a valid CA bundle with the path to certificates.
     - export REQUESTS_CA_BUNDLE=/ssl/cacert.pem  # [not win]
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
-    - pytest -vv {{ ignore_tests }} {{ disabled_tests }} gh/tests
+    - pytest -vv {{ ignore_tests }} gh/tests  # [py<314]
+    - pytest -vv {{ ignore_tests }} {{ disabled_tests }} gh/tests  # [py>=314]
 
 about:
   home: https://github.com/aws/aws-xray-sdk-python
