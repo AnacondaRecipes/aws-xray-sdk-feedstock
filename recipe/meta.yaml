@@ -13,7 +13,7 @@ source:
     folder: gh
 
 build:
-  number: 1
+  number: 2
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed --no-cache-dir -vvv
   skip: true  # [py<37]
 
@@ -50,36 +50,13 @@ requirements:
 test:
   source_files:
     - gh/tests
+  files:
+    - run_imports.py
+  # imports section moved to run_imports.py, because starts from botocore 1.43.68,
+  # it is required certificates, and REQUESTS_CA_BUNDLE environment variable.
+  # This variable should be set just before imports, so script_env doesn't work.
+  # Current solution is to set REQUESTS_CA_BUNDLE in commands section, and then run imports.
   imports:
-    - aws_xray_sdk
-    - aws_xray_sdk.core
-    - aws_xray_sdk.core.async_context
-    - aws_xray_sdk.core.context
-    - aws_xray_sdk.core.daemon_config
-    - aws_xray_sdk.core.emitters.udp_emitter
-    - aws_xray_sdk.core.exceptions.exceptions
-    - aws_xray_sdk.core.lambda_launcher
-    - aws_xray_sdk.core.models
-    - aws_xray_sdk.core.models.dummy_entities
-    - aws_xray_sdk.core.models.facade_segment
-    - aws_xray_sdk.core.models.segment
-    - aws_xray_sdk.core.models.subsegment
-    - aws_xray_sdk.core.models.throwable
-    - aws_xray_sdk.core.models.trace_header
-    - aws_xray_sdk.core.models.traceid
-    - aws_xray_sdk.core.patcher
-    - aws_xray_sdk.core.plugins.utils
-    - aws_xray_sdk.core.recorder
-    - aws_xray_sdk.core.sampling.local.sampler
-    - aws_xray_sdk.core.sampling.local.sampling_rule
-    - aws_xray_sdk.core.sampling.reservoir
-    - aws_xray_sdk.core.sampling.rule_cache
-    - aws_xray_sdk.core.sampling.sampler
-    - aws_xray_sdk.core.sampling.sampling_rule
-    - aws_xray_sdk.core.utils
-    - aws_xray_sdk.core.utils.search_pattern
-    - aws_xray_sdk.core.utils.sqs_message_helper
-    - aws_xray_sdk.version
   requires:
     - pip
     - pytest
@@ -94,9 +71,10 @@ test:
     # ca-certificates contains needed certificates.
     - ca-certificates
   commands:
+    - export REQUESTS_CA_BUNDLE=$PREFIX/ssl/cacert.pem  # [not win]
+    - set "REQUESTS_CA_BUNDLE=%PREFIX%\Library\ssl\cacert.pem"  # [win]
+    - python run_imports.py
     - pip check
-    # Tests require a valid CA bundle with the path to certificates.
-    - export REQUESTS_CA_BUNDLE=/ssl/cacert.pem  # [not win]
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
     - pytest -vv {{ ignore_tests }} gh/tests  # [py<314]
     - pytest -vv {{ ignore_tests }} {{ disabled_tests }} gh/tests  # [py>=314]
