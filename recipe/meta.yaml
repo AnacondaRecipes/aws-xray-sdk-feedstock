@@ -13,9 +13,12 @@ source:
     folder: gh
 
 build:
-  number: 1
+  number: 2
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed --no-cache-dir -vvv
   skip: true  # [py<37]
+  script_env:
+    - REQUESTS_CA_BUNDLE=$PREFIX/ssl/cacert.pem  # [not win]
+    - REQUESTS_CA_BUNDLE=%PREFIX%\Library\ssl\cacert.pem  # [win]
 
 requirements:
   host:
@@ -95,8 +98,6 @@ test:
     - ca-certificates
   commands:
     - pip check
-    # Tests require a valid CA bundle with the path to certificates.
-    - export REQUESTS_CA_BUNDLE=/ssl/cacert.pem  # [not win]
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
     - pytest -vv {{ ignore_tests }} gh/tests  # [py<314]
     - pytest -vv {{ ignore_tests }} {{ disabled_tests }} gh/tests  # [py>=314]
@@ -115,3 +116,5 @@ about:
 extra:
   recipe-maintainers:
     - mariusvniekerk
+  skip-lints:
+    - missing_imports_or_run_test_py
