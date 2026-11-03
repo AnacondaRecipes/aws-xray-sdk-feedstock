@@ -1,5 +1,5 @@
 {% set name = "aws-xray-sdk" %}
-{% set version = "2.15.0" %}
+{% set version = "2.16.0" %}
 
 package:
   name: {{ name }}
@@ -7,13 +7,13 @@ package:
 
 source:
   - url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name|replace('-', '_') }}-{{ version }}.tar.gz
-    sha256: 794381b96e835314345068ae1dd3b9120bd8b4e21295066c37e8814dbb341365
+    sha256: 4eb02acb861b83edd8b83603194ed549aaa929106be3f1d57d459983f5107d79
   - url: https://github.com/aws/{{ name }}-python/archive/refs/tags/{{ version }}.tar.gz
-    sha256: db66fbcde1519ca5db2456d73fe86dae569f39a6c03dbc5a94290783d12f2af1
+    sha256: 536b0bb4cbc4fa1c63fe51971227c9812727e9ee427cf6d7bd5a18efde343db2
     folder: gh
 
 build:
-  number: 2
+  number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed --no-cache-dir -vvv
   skip: true  # [py<37]
   script_env:
